@@ -1,0 +1,143 @@
+<body style="background-color: rgb(15, 15, 15)">
+  <main style="display: flex; flex-direction: column; align-items: center">
+    <canvas id="canvas" style="border-radius: 50px" width="1900" height="600"> </canvas>
+    <hr />
+    <p style="color: white">
+      Lorem ipsum, dolor sit amet consectetur adipisicing elit. Illo accusantium est tempore temporibus maxime optio,
+      error provident! Tempore omnis, dolore explicabo inventore totam temporibus incidunt error rem praesentium. Quos,
+      voluptates!
+    </p>
+  </main>
+</body>
+
+<script>
+  const canvas = document.getElementById("canvas");
+
+  const ctx = canvas.getContext("2d");
+
+  let DotsCords = [];
+
+  for (let i = 0; i < 50; i++) {
+    Data = [Random(0, canvas.width), Random(0, canvas.height), Random(-0.5, 0.5, true), Random(-0.5, 0.5, true)];
+    if (Data[2] == 0 && Data[3] == 0) {
+      Data = [Random(0, canvas.width), Random(0, canvas.height), Random(-0.5, 0.5, true), Random(-0.5, 0.5, true)];
+    }
+    DotsCords.push(Data);
+  }
+
+  function Random(start_range, end_range, FloorIt) {
+    if (FloorIt) {
+      return Math.random() * (end_range - start_range) + start_range;
+    } else {
+      return Math.floor(Math.random() * (end_range - start_range)) + start_range;
+    }
+  }
+
+  function RenderDot(x, y, x_offset, y_offset) {
+    ctx.fillStyle = "rgb(95, 95, 95)";
+
+    ctx.beginPath();
+    ctx.arc(x + x_offset, y + y_offset, 2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+  }
+
+  function Draw() {
+    for (let i = 0; i < DotsCords.length; i++) {
+      let x = DotsCords[i][0];
+      let y = DotsCords[i][1];
+      let x_offset = DotsCords[i][2];
+      let y_offset = DotsCords[i][3];
+
+      x += x_offset;
+      y += y_offset;
+
+      if (x > canvas.width + 20 || x < -20 || y > canvas.height + 20 || y < -20) {
+        x = Random(0, canvas.width);
+        y = Random(0, canvas.height);
+        x_offset = Random(-0.5, 0.5, true);
+        y_offset = Random(-0.5, 0.5, true);
+
+        if (x_offset == 0) {
+          x_offset += 1;
+        }
+        if (y_offset == 0) {
+          y_offset += 1;
+        }
+      }
+
+      RenderDot(x, y, x_offset, y_offset);
+
+      let first_lowest = 0;
+      let first_lowest_distance = 9999;
+      let second_lowest = 0;
+      let second_lowest_distance = 9999;
+      let third_lowest = 0;
+      let third_lowest_distance = 9999;
+      let fourth_lowest = 0;
+      let fourth_lowest_distance = 9999;
+
+      for (let j = 0; j < DotsCords.length; j++) {
+        if (i != j) {
+          if (
+            Math.sqrt(Math.pow(DotsCords[i][0] - DotsCords[j][0], 2) + Math.pow(DotsCords[i][1] - DotsCords[j][1], 2)) <
+            fourth_lowest_distance
+          ) {
+            fourth_lowest = j;
+            fourth_lowest_distance = Math.sqrt(
+              Math.pow(DotsCords[i][0] - DotsCords[j][0], 2) + Math.pow(DotsCords[i][1] - DotsCords[j][1], 2)
+            );
+            if (fourth_lowest_distance < third_lowest_distance) {
+              let hold = third_lowest;
+              let hold_distance = third_lowest_distance;
+              third_lowest = fourth_lowest;
+              third_lowest_distance = fourth_lowest_distance;
+              fourth_lowest_distance = hold_distance;
+              fourth_lowest = hold;
+            }
+            if (third_lowest_distance < second_lowest_distance) {
+              let hold = second_lowest;
+              let hold_distance = second_lowest_distance;
+              second_lowest = third_lowest;
+              second_lowest_distance = third_lowest_distance;
+              third_lowest_distance = hold_distance;
+              thirdlowest = hold;
+            }
+            if (second_lowest_distance < first_lowest_distance) {
+              let hold = first_lowest;
+              let hold_distance = first_lowest_distance;
+              first_lowest = second_lowest;
+              first_lowest_distance = second_lowest_distance;
+              second_lowest_distance = hold_distance;
+              second_lowest = hold;
+            }
+          }
+        }
+      }
+
+      ctx.fillStyle = "rgb(20,20,20)";
+
+      ctx.beginPath(); // Start a new path
+
+      ctx.moveTo(DotsCords[i][0], DotsCords[i][1]);
+      ctx.lineTo(DotsCords[first_lowest][0], DotsCords[first_lowest][1]);
+      ctx.lineTo(DotsCords[second_lowest][0], DotsCords[second_lowest][1]);
+      ctx.lineTo(DotsCords[third_lowest][0], DotsCords[third_lowest][1]);
+      ctx.lineTo(DotsCords[fourth_lowest][0], DotsCords[fourth_lowest][1]);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke(); // Render the path
+
+      DotsCords[i][0] = x;
+      DotsCords[i][1] = y;
+      DotsCords[i][2] = x_offset;
+      DotsCords[i][3] = y_offset;
+    }
+  }
+
+  window.setInterval(() => {
+    ctx.fillStyle = "rgba(15,15,15,0.6)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    Draw();
+  }, 40);
+</script>
